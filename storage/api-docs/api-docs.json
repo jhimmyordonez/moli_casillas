@@ -1,0 +1,900 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API MoliCasillas",
+        "description": "Documentación de la API para el Sistema de Casilla Electrónica MoliCasillas",
+        "contact": {
+            "email": "admin@molicasillas.gob.pe"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://molicasillas.test",
+            "description": "Servidor de API MoliCasillas"
+        }
+    ],
+    "paths": {
+        "/api/v1/casilla/messages/{mensajeId}/attachments": {
+            "get": {
+                "tags": [
+                    "Adjuntos"
+                ],
+                "summary": "Listar adjuntos de un mensaje",
+                "operationId": "9a650781243f3b4deea9126432019c18",
+                "parameters": [
+                    {
+                        "name": "mensajeId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de adjuntos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Adjunto"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mensaje no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/casilla/attachments/{id}/download": {
+            "get": {
+                "tags": [
+                    "Adjuntos"
+                ],
+                "summary": "Descargar adjunto",
+                "operationId": "a87048fc6a7dbca25dc9b9b9071a5e8b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Stream de descarga del archivo",
+                        "content": {
+                            "application/octet-stream": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Adjunto no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Iniciar sesión con ID externo",
+                "operationId": "a7997e7c1e3bfed64d4e56de82415931",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "usuario_auth_id",
+                                    "tipo_documento",
+                                    "numero_documento",
+                                    "nombre_mostrar"
+                                ],
+                                "properties": {
+                                    "usuario_auth_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "example": "11111111-1111-1111-1111-111111111111"
+                                    },
+                                    "tipo_documento": {
+                                        "type": "string",
+                                        "enum": [
+                                            "DNI",
+                                            "CE",
+                                            "RUC"
+                                        ],
+                                        "example": "DNI"
+                                    },
+                                    "numero_documento": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "nombre_mostrar": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "juan@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inicio de sesión exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|AbCdEf..."
+                                                },
+                                                "tipo_token": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "cuenta": {
+                                                    "$ref": "#/components/schemas/Casilla"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Cerrar sesión",
+                "operationId": "f6b8957b4c0b25636613a9f0512a8ba9",
+                "responses": {
+                    "200": {
+                        "description": "Sesión cerrada correctamente"
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me": {
+            "get": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Obtener usuario autenticado",
+                "operationId": "13b43df400e475a157538f73617b8c3d",
+                "responses": {
+                    "200": {
+                        "description": "Datos del usuario actual",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Casilla"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/casilla/messages": {
+            "get": {
+                "tags": [
+                    "Mensajes"
+                ],
+                "summary": "Listar mensajes",
+                "operationId": "579e6cf706618ab0197eadd3f1a52b5f",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items por página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "asunto",
+                        "in": "query",
+                        "description": "Filtrar por asunto",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fecha_desde",
+                        "in": "query",
+                        "description": "Filtrar por fecha desde (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "fecha_hasta",
+                        "in": "query",
+                        "description": "Filtrar por fecha hasta (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "etiqueta_estado",
+                        "in": "query",
+                        "description": "Filtrar por estado",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "SIN LEER",
+                                "NOTIFICADO",
+                                "LEÍDO",
+                                "ARCHIVADO"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de mensajes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Mensaje"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                },
+                                                "total_pages": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/casilla/messages/statuses": {
+            "get": {
+                "tags": [
+                    "Mensajes"
+                ],
+                "summary": "Contar mensajes por estado",
+                "operationId": "c7aff56cd1acec9ea8b638f9814b30d2",
+                "responses": {
+                    "200": {
+                        "description": "Conteo de estados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "estados": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "codigo": {
+                                                                "type": "string"
+                                                            },
+                                                            "etiqueta": {
+                                                                "type": "string"
+                                                            },
+                                                            "cantidad": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "cantidad_no_leidos": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/casilla/messages/{id}": {
+            "get": {
+                "tags": [
+                    "Mensajes"
+                ],
+                "summary": "Obtener detalle del mensaje",
+                "operationId": "2e5e59be0a362b688f27c3a81ed58a85",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del mensaje",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mensaje no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/casilla/messages/{id}/read": {
+            "patch": {
+                "tags": [
+                    "Mensajes"
+                ],
+                "summary": "Marcar mensaje como leído",
+                "operationId": "3fce4e4aa077ad66548d4ae77c4e3be2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mensaje marcado como leído",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mensaje no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/casilla/messages/{id}/archive": {
+            "patch": {
+                "tags": [
+                    "Mensajes"
+                ],
+                "summary": "Archivar mensaje",
+                "operationId": "3171bc595a25213bcec33de65725f533",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mensaje archivado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mensaje"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mensaje no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/terms/current": {
+            "get": {
+                "tags": [
+                    "Términos"
+                ],
+                "summary": "Obtener términos y condiciones vigentes",
+                "operationId": "dc9b4e52fc94d16e49112bd0140bd98a",
+                "responses": {
+                    "200": {
+                        "description": "Versión de términos vigente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VersionTerminos"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No hay términos activos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/terms/accept": {
+            "post": {
+                "tags": [
+                    "Términos"
+                ],
+                "summary": "Aceptar términos y condiciones",
+                "operationId": "b5ea0f744ee9cd60eca67decbe1f85fb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "version_terminos_id"
+                                ],
+                                "properties": {
+                                    "version_terminos_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Términos aceptados correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "mensaje": {
+                                                    "type": "string",
+                                                    "example": "Términos aceptados correctamente."
+                                                },
+                                                "aceptado_en": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AceptacionTerminos": {
+                "title": "AceptacionTerminos",
+                "description": "Aceptación de términos y condiciones",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "version_terminos_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "usuario_auth_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "aceptado_en": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ip": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Adjunto": {
+                "title": "Adjunto",
+                "description": "Adjunto de mensaje",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "mensaje_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "nombre_archivo": {
+                        "type": "string"
+                    },
+                    "tipo_mime": {
+                        "type": "string"
+                    },
+                    "tamano_bytes": {
+                        "type": "integer"
+                    },
+                    "subido_en": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Casilla": {
+                "title": "Casilla",
+                "description": "Cuenta de usuario de casilla",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "usuario_auth_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tipo_documento": {
+                        "type": "string",
+                        "enum": [
+                            "DNI",
+                            "CE",
+                            "RUC"
+                        ]
+                    },
+                    "numero_documento": {
+                        "type": "string"
+                    },
+                    "nombre_mostrar": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "estado": {
+                        "type": "string",
+                        "enum": [
+                            "ACTIVO",
+                            "SUSPENDIDO"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "EventoMensaje": {
+                "title": "EventoMensaje",
+                "description": "Evento registrado para un mensaje",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "mensaje_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tipo_evento": {
+                        "type": "string"
+                    },
+                    "ocurrido_en": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "actor_usuario_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "ip": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "user_agent": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "metadatos": {
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Mensaje": {
+                "title": "Mensaje",
+                "description": "Mensaje de usuario",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "casilla_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "remitente_nombre": {
+                        "type": "string"
+                    },
+                    "remitente_entidad": {
+                        "type": "string"
+                    },
+                    "destinatario_nombre": {
+                        "type": "string"
+                    },
+                    "destinatario_tipo_doc": {
+                        "type": "string"
+                    },
+                    "destinatario_num_doc": {
+                        "type": "string"
+                    },
+                    "asunto": {
+                        "type": "string"
+                    },
+                    "cuerpo": {
+                        "type": "string"
+                    },
+                    "registrado_en": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "codigo_estado": {
+                        "type": "string"
+                    },
+                    "etiqueta_estado": {
+                        "type": "string"
+                    },
+                    "notificado_en": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "leido_en": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "archivado_en": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "codigo_referencia": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "codigo_expediente": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "VersionTerminos": {
+                "title": "VersionTerminos",
+                "description": "Versión de términos y condiciones",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "version": {
+                        "type": "string"
+                    },
+                    "contenido_html": {
+                        "type": "string"
+                    },
+                    "es_activo": {
+                        "type": "boolean"
+                    },
+                    "publicado_en": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Adjuntos",
+            "description": "Adjuntos"
+        },
+        {
+            "name": "Autenticación",
+            "description": "Autenticación"
+        },
+        {
+            "name": "Mensajes",
+            "description": "Mensajes"
+        },
+        {
+            "name": "Términos",
+            "description": "Términos"
+        }
+    ]
+}
