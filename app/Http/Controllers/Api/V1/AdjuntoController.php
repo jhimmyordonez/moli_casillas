@@ -12,48 +12,44 @@ use App\Models\Mensaje;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdjuntoController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/v1/casilla/messages/{mensajeId}/attachments",
+     *     path="/api/v1/casilla/messages/{messageId}/attachments",
      *     summary="Listar adjuntos de un mensaje",
      *     tags={"Adjuntos"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="mensajeId", in="path", required=true, @OA\Schema(type="string", format="uuid")),
+     *
+     *     @OA\Parameter(name="messageId", in="path", required=true, @OA\Schema(type="string", format="uuid")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Listado de adjuntos",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Adjunto"))
      *         )
      *     ),
+     *
      *     @OA\Response(response=404, description="Mensaje no encontrado")
      * )
      */
-    public function index(Request $request, string $mensajeId): JsonResponse
+    public function index(Request $request, string $messageId): JsonResponse
     {
         /** @var \App\Models\Casilla $user */
         $user = $request->user();
 
         $mensaje = Mensaje::query()
             ->paraCasilla($user->id)
-            ->where('id', $mensajeId)
-            ->first();
+            ->where('id', $messageId)
+            ->firstOrFail();
 
-        if (! $mensaje) {
-            return response()->json([
-                'data' => null,
-                'meta' => null,
-                'errors' => [
-                    ['code' => 'NOT_FOUND', 'message' => 'Resource not found.'],
-                ],
-            ], 404);
-        }
+        $this->authorize('view', $mensaje);
 
         $adjuntos = $mensaje->adjuntos;
 
@@ -70,12 +66,16 @@ class AdjuntoController extends Controller
      *     summary="Descargar adjunto",
      *     tags={"Adjuntos"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string", format="uuid")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Stream de descarga del archivo",
+     *
      *         @OA\MediaType(mediaType="application/octet-stream")
      *     ),
+     *
      *     @OA\Response(response=404, description="Adjunto no encontrado")
      * )
      */
@@ -85,19 +85,11 @@ class AdjuntoController extends Controller
         $user = $request->user();
 
         $adjunto = Adjunto::query()
-            ->with('mensaje')
+            ->whereHas('mensaje', fn ($q) => $q->paraCasilla($user->id))
             ->where('id', $id)
-            ->first();
+            ->firstOrFail();
 
-        if (! $adjunto || $adjunto->mensaje->casilla_id !== $user->id) {
-            return response()->json([
-                'data' => null,
-                'meta' => null,
-                'errors' => [
-                    ['code' => 'NOT_FOUND', 'message' => 'Resource not found.'],
-                ],
-            ], 404);
-        }
+        $this->authorize('download', $adjunto);
 
         EventoMensaje::query()->create([
             'mensaje_id' => $adjunto->mensaje_id,

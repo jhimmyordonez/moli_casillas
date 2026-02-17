@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'terms.accepted' => EnsureTermsAccepted::class,
+            'casilla.activa' => \App\Http\Middleware\EnsureCasillaActiva::class,
         ]);
 
         $middleware->statefulApi();

@@ -32,8 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/terms/accept', [TerminosController::class, 'accept'])
         ->name('api.v1.terms.accept');
 
-    // Casilla (requires terms accepted)
-    Route::middleware('terms.accepted')->prefix('casilla')->group(function () {
+    // Casilla (requires terms accepted and active account)
+    Route::middleware(['terms.accepted', 'casilla.activa'])->prefix('casilla')->group(function () {
         // Messages
         Route::get('/messages', [MensajeController::class, 'index'])
             ->name('api.v1.casilla.messages.index');

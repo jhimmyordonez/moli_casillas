@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
-
 use OpenApi\Annotations as OA;
 
 /**
@@ -18,6 +17,7 @@ use OpenApi\Annotations as OA;
  *     schema="Casilla",
  *     title="Casilla",
  *     description="Cuenta de usuario de casilla",
+ *
  *     @OA\Property(property="id", type="string", format="uuid"),
  *     @OA\Property(property="usuario_auth_id", type="string", format="uuid"),
  *     @OA\Property(property="tipo_documento", type="string", enum={"DNI", "CE", "RUC"}),
@@ -76,6 +76,7 @@ class Casilla extends Authenticatable
     {
         $terminosActivos = VersionTerminos::query()
             ->where('es_activo', true)
+            ->latest('publicado_en')
             ->first();
 
         if (! $terminosActivos) {

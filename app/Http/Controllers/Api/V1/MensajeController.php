@@ -14,7 +14,6 @@ use App\Models\EventoMensaje;
 use App\Models\Mensaje;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
 use OpenApi\Annotations as OA;
 
 class MensajeController extends Controller
@@ -25,16 +24,22 @@ class MensajeController extends Controller
      *     summary="Listar mensajes",
      *     tags={"Mensajes"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(name="page", in="query", description="Página", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="per_page", in="query", description="Items por página", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="asunto", in="query", description="Filtrar por asunto", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="fecha_desde", in="query", description="Filtrar por fecha desde (YYYY-MM-DD)", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="fecha_hasta", in="query", description="Filtrar por fecha hasta (YYYY-MM-DD)", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="etiqueta_estado", in="query", description="Filtrar por estado", required=false, @OA\Schema(type="string", enum={"SIN LEER", "NOTIFICADO", "LEÍDO", "ARCHIVADO"})),
+     *     @OA\Parameter(name="remitente_nombre", in="query", description="Filtrar por nombre del remitente", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="destinatario_num_doc", in="query", description="Filtrar por número de documento del destinatario", required=false, @OA\Schema(type="string")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Listado de mensajes",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Mensaje")),
      *             @OA\Property(property="meta", type="object",
      *                 @OA\Property(property="page", type="integer"),
@@ -103,10 +108,13 @@ class MensajeController extends Controller
      *     summary="Contar mensajes por estado",
      *     tags={"Mensajes"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Conteo de estados",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="estados", type="array", @OA\Items(
      *                     @OA\Property(property="codigo", type="string"),
@@ -184,12 +192,16 @@ class MensajeController extends Controller
      *     summary="Obtener detalle del mensaje",
      *     tags={"Mensajes"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string", format="uuid")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Detalle del mensaje",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/Mensaje")
      *     ),
+     *
      *     @OA\Response(response=404, description="Mensaje no encontrado")
      * )
      */
@@ -202,17 +214,9 @@ class MensajeController extends Controller
             ->with('adjuntos')
             ->paraCasilla($user->id)
             ->where('id', $id)
-            ->first();
+            ->firstOrFail();
 
-        if (! $mensaje) {
-            return response()->json([
-                'data' => null,
-                'meta' => null,
-                'errors' => [
-                    ['code' => 'NOT_FOUND', 'message' => 'Resource not found.'],
-                ],
-            ], 404);
-        }
+        $this->authorize('view', $mensaje);
 
         return response()->json([
             'data' => new MensajeDetalleResource($mensaje),
@@ -227,12 +231,16 @@ class MensajeController extends Controller
      *     summary="Marcar mensaje como leído",
      *     tags={"Mensajes"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string", format="uuid")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Mensaje marcado como leído",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/Mensaje")
      *     ),
+     *
      *     @OA\Response(response=404, description="Mensaje no encontrado")
      * )
      */
@@ -244,17 +252,9 @@ class MensajeController extends Controller
         $mensaje = Mensaje::query()
             ->paraCasilla($user->id)
             ->where('id', $id)
-            ->first();
+            ->firstOrFail();
 
-        if (! $mensaje) {
-            return response()->json([
-                'data' => null,
-                'meta' => null,
-                'errors' => [
-                    ['code' => 'NOT_FOUND', 'message' => 'Resource not found.'],
-                ],
-            ], 404);
-        }
+        $this->authorize('markRead', $mensaje);
 
         if ($mensaje->leido_en === null) {
             $mensaje->update([
@@ -286,12 +286,16 @@ class MensajeController extends Controller
      *     summary="Archivar mensaje",
      *     tags={"Mensajes"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string", format="uuid")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Mensaje archivado",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/Mensaje")
      *     ),
+     *
      *     @OA\Response(response=404, description="Mensaje no encontrado")
      * )
      */
@@ -303,17 +307,9 @@ class MensajeController extends Controller
         $mensaje = Mensaje::query()
             ->paraCasilla($user->id)
             ->where('id', $id)
-            ->first();
+            ->firstOrFail();
 
-        if (! $mensaje) {
-            return response()->json([
-                'data' => null,
-                'meta' => null,
-                'errors' => [
-                    ['code' => 'NOT_FOUND', 'message' => 'Resource not found.'],
-                ],
-            ], 404);
-        }
+        $this->authorize('archive', $mensaje);
 
         if ($mensaje->archivado_en === null) {
             $mensaje->update([

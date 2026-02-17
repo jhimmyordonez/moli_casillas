@@ -15,16 +15,16 @@
         }
     ],
     "paths": {
-        "/api/v1/casilla/messages/{mensajeId}/attachments": {
+        "/api/v1/casilla/messages/{messageId}/attachments": {
             "get": {
                 "tags": [
                     "Adjuntos"
                 ],
                 "summary": "Listar adjuntos de un mensaje",
-                "operationId": "9a650781243f3b4deea9126432019c18",
+                "operationId": "c123d9e29142e26e76dc2a5a880da0e0",
                 "parameters": [
                     {
-                        "name": "mensajeId",
+                        "name": "messageId",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -304,6 +304,24 @@
                                 "LEÍDO",
                                 "ARCHIVADO"
                             ]
+                        }
+                    },
+                    {
+                        "name": "remitente_nombre",
+                        "in": "query",
+                        "description": "Filtrar por nombre del remitente",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destinatario_num_doc",
+                        "in": "query",
+                        "description": "Filtrar por número de documento del destinatario",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -874,7 +892,7 @@
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
-                "bearerFormat": "JWT",
+                "bearerFormat": "Token",
                 "scheme": "bearer"
             }
         }
