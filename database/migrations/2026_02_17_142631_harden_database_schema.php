@@ -39,8 +39,10 @@ return new class extends Migration
         });
 
         // 6. Hardening versiones_terminos: partial unique index for only one active version
-        if (DB::getDriverName() === 'pgsql' || DB::getDriverName() === 'sqlite') {
-            DB::statement('CREATE UNIQUE INDEX unv_solo_una_version_activa ON versiones_terminos (es_activo) WHERE (es_activo = 1 OR es_activo = true)');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE UNIQUE INDEX unv_solo_una_version_activa ON versiones_terminos (es_activo) WHERE es_activo = true');
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::statement('CREATE UNIQUE INDEX unv_solo_una_version_activa ON versiones_terminos (es_activo) WHERE es_activo = 1');
         }
     }
 

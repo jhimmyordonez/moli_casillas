@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
 use OpenApi\Annotations as OA;
 
 /**
@@ -20,6 +19,7 @@ use OpenApi\Annotations as OA;
  *     schema="Mensaje",
  *     title="Mensaje",
  *     description="Mensaje de usuario",
+ *
  *     @OA\Property(property="id", type="string", format="uuid"),
  *     @OA\Property(property="casilla_id", type="string", format="uuid"),
  *     @OA\Property(property="remitente_nombre", type="string"),
@@ -63,6 +63,7 @@ class Mensaje extends Model
         'notificado_en',
         'leido_en',
         'archivado_en',
+        'destacado',
         'codigo_referencia',
         'codigo_expediente',
     ];
@@ -78,11 +79,13 @@ class Mensaje extends Model
             'notificado_en' => 'datetime',
             'leido_en' => 'datetime',
             'archivado_en' => 'datetime',
+            'destacado' => 'boolean',
         ];
     }
 
     /**
      * Compute the user-visible status label from timestamps.
+     *
      * @return Attribute<string, never>
      */
     protected function etiquetaEstadoComputada(): Attribute

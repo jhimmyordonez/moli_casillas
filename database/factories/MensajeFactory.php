@@ -50,6 +50,7 @@ class MensajeFactory extends Factory
             'archivado_en' => null,
             'codigo_referencia' => 'EXP-'.fake()->numerify('####-####'),
             'codigo_expediente' => fake()->optional(0.5)->numerify('####-####-MDLM'),
+            'destacado' => fake()->boolean(20),
         ];
     }
 

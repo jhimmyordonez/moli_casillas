@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Mensaje;
 use App\Models\Casilla;
+use App\Models\Mensaje;
 
 it('devuelve lista vacía para casilla sin mensajes', function () {
     ['account' => $account, 'token' => $token] = createAuthenticatedAccount();
@@ -41,7 +41,7 @@ it('devuelve etiqueta_estado correcta en lista', function () {
         ->getJson('/api/v1/casilla/messages');
 
     $response->assertSuccessful();
-    expect($response->json('data.0.etiqueta_estado'))->toBe('SIN LEER');
+    expect($response->json('data.0.leido'))->toBeFalse();
 });
 
 it('filtra por etiqueta_estado', function () {
@@ -118,6 +118,6 @@ it('incluye acciones en la respuesta', function () {
 
     $response->assertSuccessful()
         ->assertJsonStructure([
-            'data' => [['id', 'remitente_nombre', 'destinatario_nombre', 'asunto', 'registrado_en', 'etiqueta_estado', 'acciones' => ['puede_ver', 'puede_descargar', 'puede_marcar_leido', 'puede_archivar']]],
+            'data' => [['id', 'asunto', 'documento', 'hora', 'leido', 'destacado', 'seleccionado', 'contenido']],
         ]);
 });

@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Adjunto;
-use App\Models\Mensaje;
 use App\Models\Casilla;
+use App\Models\Mensaje;
 
 it('muestra detalle del mensaje con adjuntos', function () {
     ['account' => $account, 'token' => $token] = createAuthenticatedAccount();
@@ -19,7 +19,7 @@ it('muestra detalle del mensaje con adjuntos', function () {
         ->assertJsonPath('data.asunto', $mensaje->asunto)
         ->assertJsonCount(2, 'data.adjuntos')
         ->assertJsonStructure([
-            'data' => ['id', 'remitente_nombre', 'destinatario_nombre', 'asunto', 'cuerpo', 'etiqueta_estado', 'adjuntos', 'codigo_referencia', 'codigo_expediente'],
+            'data' => ['id', 'asunto', 'documento', 'hora', 'leido', 'destacado', 'seleccionado', 'contenido', 'adjuntos'],
         ]);
 });
 

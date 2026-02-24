@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Casilla;
 use App\Models\EventoMensaje;
 use App\Models\Mensaje;
-use App\Models\Casilla;
 
 it('marca un mensaje como leído', function () {
     ['account' => $account, 'token' => $token] = createAuthenticatedAccount();
@@ -14,7 +14,7 @@ it('marca un mensaje como leído', function () {
         ->patchJson("/api/v1/casilla/messages/{$mensaje->id}/read");
 
     $response->assertSuccessful()
-        ->assertJsonPath('data.etiqueta_estado', 'LEÍDO');
+        ->assertJsonPath('data.leido', true);
 
     $mensaje->refresh();
     expect($mensaje->leido_en)->not->toBeNull();
@@ -50,7 +50,7 @@ it('archiva un mensaje', function () {
         ->patchJson("/api/v1/casilla/messages/{$mensaje->id}/archive");
 
     $response->assertSuccessful()
-        ->assertJsonPath('data.etiqueta_estado', 'ARCHIVADO');
+        ->assertJsonPath('data.leido', true);
 
     $mensaje->refresh();
     expect($mensaje->archivado_en)->not->toBeNull();
